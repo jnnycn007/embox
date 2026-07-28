@@ -10,6 +10,7 @@
 #define DRIVERS_CLK_NIIET_K1921VG1T_H
 
 extern void niiet_sysclk_init(void);
+extern void niiet_sysclk_pll_init(int pll);
 
 extern int clk_enable(char *clk_name);
 

@@ -299,11 +299,13 @@ struct rcu_reg {
 #define RCU_SPICLKCFG_DIVN_MASK                0x003F0000UL
 
 #define RCU_USBCLKCFG_CLKEN_MASK                0x00000001UL
+#define RCU_USBCLKCFG_CLKSEL_OFFSET             (8)
 #define RCU_USBCLKCFG_CLKSEL_MASK               0x000300UL
 # define  RCU_USBCLKCFG_CLKSEL_SYSPLL0CLK_MASK   0x000000UL
 # define  RCU_USBCLKCFG_CLKSEL_SYSPLL1CLK_MASK   0x000100UL
 # define  RCU_USBCLKCFG_CLKSEL_SYSPLL2CLK_MASK   0x000200UL
 # define  RCU_USBCLKCFG_CLKSEL_EXTCLK_MASK       0x000300UL
+# define  RCU_USBCLKCFG_CLKSEL_PLL(pll)    (pll << RCU_USBCLKCFG_CLKSEL_OFFSET)
 #define RCU_USBCLKCFG_DIVEN_MASK                0x001000UL
 #define RCU_USBCLKCFG_DIVN_MASK	                0x3f0000UL
 
@@ -366,7 +368,14 @@ void niiet_tmr_set_rcu(int num) {
 void niiet_usbd_set_rcu(int num) {
 	RCU->RCU_CGCFGAHB_reg |= RCU_CGCFGAHB_USBDEN(num);
 	RCU->RCU_RSTDISAHB_reg |= RCU_RSTDISAHB_USBDEN(num);
-	/* PLL0CLK by default */
+#if defined(CONF_RCU_TYPE_PLL_NUM)
+#define USBCLKCFG_CLKSEL      CONF_RCU_TYPE_PLL_NUM
+	niiet_sysclk_pll_init(CONF_RCU_TYPE_PLL_NUM);
+#else
+#define USBCLKCFG_CLKSEL      RCU_USBCLKCFG_CLKSEL_SYSPLL1CLK_MASK
+	niiet_sysclk_pll_init(1);
+#endif
+	RCU->RCU_USBCFG_reg[num] = RCU_USBCLKCFG_CLKSEL_PLL(USBCLKCFG_CLKSEL);
 	RCU->RCU_USBCFG_reg[num] |= RCU_USBCLKCFG_CLKEN_MASK;
 }
 
@@ -429,6 +438,61 @@ int clk_enable(char *clk_name) {
 	}
 
 	return -ENOSUPP;
+}
+
+void niiet_sysclk_pll_init(int pll) {
+    uint32_t pll_lock_flag = 0;
+
+//PLLCLK = REFCLK * (FBDIV+FRAC/2^24) / (REFDIV*(1+PD0A)*(1+PD0B))
+#if (CONF_RCU_CLK_ENABLE_HSECLK_VAL() == 10000000)
+
+#elif (CONF_RCU_CLK_ENABLE_HSECLK_VAL() == 12000000)
+
+
+#elif (CONF_RCU_CLK_ENABLE_HSECLK_VAL() == 16000000)
+    //FOUT = 120 000 000 Hz  from 16 MHz HSE
+    // RCU->PLLDIV is equivalent for RCU->PLL[0].DIV
+    RCU->RCU_PLLCFG_reg[pll].DIV = ( 1 << RCU_PLL_DIV_DIV1A_Pos ) |
+                  ( 1 << RCU_PLL_DIV_DIV1B_Pos ) |
+                  ( 1 << RCU_PLL_DIV_PREDIV_Pos) |
+                  ( 1 << RCU_PLL_DIV_NNCLR_Pos ) |             // N-divider enable
+                  ( 1 << RCU_PLL_DIV_RNCLR_Pos ) |             // R-divider enable
+                  ( 3 << RCU_PLL_DIV_RDIV_Pos  ) |
+                  (120 << RCU_PLL_DIV_NDIV_Pos );
+	RCU->RCU_PLLCFG_reg[pll].MOD  = (1 << RCU_PLL_FRAC_FRAC_Pos );
+	RCU->RCU_PLLCFG_reg[pll].FRAC = (1 << RCU_PLL_MOD_MOD_Pos   );
+	RCU->RCU_PLLCFG_reg[pll].CFG  = (1 << RCU_PLL_CFG_FOUTEN_Pos ) |			// Fout enable
+			       (3 << RCU_PLL_CFG_PFD_Pos    ) |
+			       (0 << RCU_PLL_CFG_CLKSEL_Pos ) |
+			       (1 << RCU_PLL_CFG_VCOMODE_Pos) |
+			       (0 << RCU_PLL_CFG_ST_Pos) ;				  // ST = 0 for integer divider
+
+#elif (CONF_RCU_CLK_ENABLE_HSECLK_VAL() == 20000000)
+
+#elif (CONF_RCU_CLK_ENABLE_HSECLK_VAL() == 24000000)
+#elif (CONF_RCU_CLK_ENABLE_HSECLK_VAL() == 27000000)
+    //FOUT = 204 000 000 Hz  from 27 MHz HSE
+    // RCU->PLLDIV is equivalent for RCU->PLL[0].DIV
+    RCU->RCU_PLLCFG_reg[pll].DIV = ( 1 << RCU_PLL_DIV_DIV1A_Pos ) |
+                  ( 2 << RCU_PLL_DIV_DIV1B_Pos ) |
+                  ( 1 << RCU_PLL_DIV_PREDIV_Pos) |
+                  ( 1 << RCU_PLL_DIV_NNCLR_Pos ) |             // N-divider enable
+                  ( 1 << RCU_PLL_DIV_RNCLR_Pos ) |             // R-divider enable
+                  ( 2 << RCU_PLL_DIV_RDIV_Pos  ) |
+                  (100 << RCU_PLL_DIV_NDIV_Pos );
+	RCU->RCU_PLLCFG_reg[pll].MOD  = (1 << RCU_PLL_FRAC_FRAC_Pos );
+	RCU->RCU_PLLCFG_reg[pll].FRAC = (1 << RCU_PLL_MOD_MOD_Pos   );
+	RCU->RCU_PLLCFG_reg[pll].CFG  = (1 << RCU_PLL_CFG_FOUTEN_Pos ) |			// Fout enable
+			       (3 << RCU_PLL_CFG_PFD_Pos    ) |
+			       (0 << RCU_PLL_CFG_CLKSEL_Pos ) |
+			       (1 << RCU_PLL_CFG_VCOMODE_Pos) |
+			       (0 << RCU_PLL_CFG_ST_Pos) ;				  // ST = 0 for integer divider
+
+#else
+#error "Please define HSECLK_VAL with correct values!"
+#endif
+	pll_lock_flag = 1 << pll;
+	while(!(RCU->RCU_PLLSTAT_reg & pll_lock_flag)) {}
 }
 
 void niiet_sysclk_init(void) {
