@@ -19,6 +19,7 @@ struct clk_conf clks[] = {
 		},
 		.type = {
 			VAL("SYSCLK_PLL", 1),
+			VAL("PLL_NUM", 1),
 		},
 	},
 	[1] = {
