@@ -31,7 +31,33 @@
 #define USB_AF(name)  \
 			MACRO_CONCAT(MACRO_CONCAT(CONF_PIN_PREF, name), _AF)
 
-void usb_phy_utmi_bconf_init(struct niiet_udc *niiet_udc) {
+#if USB_NUM == 0
+#if defined CONF_USB0_MISC_PHY_EXT && (CONF_USB0_MISC_PHY_EXT != 0)
+#define USE_PHY_EXT         1
+#else
+#define USE_PHY_EXT         0
+#if defined CONF_USB0_MISC_PHY_POLARITY && (CONF_USB0_MISC_PHY_POLARITY != 0)
+#define USE_PHY_POLARITY    1
+#else
+#define USE_PHY_POLARITY    0
+#endif /* defined CONF_USB0_MISC_PHY_POLARITY && (CONF_USB0_MISC_PHY_POLARITY != 0) */
+#endif /* defined CONF_USB0_MISC_PHY_EXT && (CONF_USB0_MISC_PHY_EXT != 0) */
+
+#elif USB_NUM == 1
+#if defined CONF_USB1_MISC_PHY_EXT && (CONF_USB1_MISC_PHY_EXT != 0)
+#define USE_PHY_EXT     1
+#else
+#define USE_PHY_EXT     0
+#if defined CONF_USB1_MISC_PHY_POLARITY && (CONF_USB1_MISC_PHY_POLARITY != 0)
+#define USE_PHY_POLARITY    1
+#else
+#define USE_PHY_POLARITY    0
+#endif /* defined CONF_USB1_MISC_PHY_POLARITY && (CONF_USB1_MISC_PHY_POLARITY != 0) */
+#endif /* defined CONF_USB1_MISC_PHY_EXT && (CONF_USB1_MISC_PHY_EXT != 0) */
+#endif
+
+void usb_phy_bconf_init(struct niiet_udc *niiet_udc) {
+#if USE_PHY_EXT
 	/* CLK */
 	gpio_setup_mode(USB_PORT(CLK), (1 << USB_PIN(CLK)),
 	    GPIO_MODE_ALT_SET(USB_AF(CLK))/* | GPIO_MODE_OUT_PUSH_PULL */);
@@ -130,4 +156,15 @@ void usb_phy_utmi_bconf_init(struct niiet_udc *niiet_udc) {
 	    GPIO_MODE_ALT_SET(USB_AF(RESET)) /* | GPIO_MODE_OUT_PUSH_PULL */);
 
 	niiet_udc->usbphy_regs->PHYCFG0 = USBCTR_PHYCFG0_EXTPHY;
+
+	while(!(niiet_udc->usbphy_regs->PHYSTAT & USBCTR_PHYSTAT_UTMI_CLK_EN));
+#else
+	//gpio_setup_mode(0, 0xffff, GPIO_MODE_ALT_SET(4));
+	//gpio_setup_mode(1, 0x3fff, GPIO_MODE_ALT_SET(4));
+
+	niiet_udc->usbphy_regs->PHYCFG0 = USE_PHY_POLARITY << USBCTR_PHYCFG0_POL_Pos
+									| 0 << USBCTR_PHYCFG0_EXTPHY_Pos;
+	while(!(niiet_udc->usbphy_regs->PHYSTAT & USBCTR_PHYSTAT_UTMI_CLK_EN));
+
+# endif /* USE_PHY_EXT */
 }

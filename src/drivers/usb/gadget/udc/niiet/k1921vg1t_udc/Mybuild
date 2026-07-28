@@ -6,5 +6,7 @@ module k1921vg1t_udc {
 	option number usb_num
 
 	source "k1921vg1t_udc_drv.c"
-	source "k1921vg1t_udc_utmi.c"
+	source "k1921vg1t_udc_dma_desc.c"
+	source "k1921vg1t_udc_ep.c"
+	source "k1921vg1t_udc_phy.c"
 }
