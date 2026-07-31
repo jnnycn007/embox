@@ -115,7 +115,10 @@ struct rcu_reg {
 #define RCU_CGCFGAHB_GPIOEN(port)   (1 << (0 + port))
 
 #define RCU_AHB_USBD_OFFSET    16
-#define RCU_CGCFGAHB_USBDEN(port)   (1 << (RCU_AHB_USBD_OFFSET + port * 2))
+#define RCU_CGCFGAHB_USBDEN(port)   (1 << (RCU_AHB_USBD_OFFSET + (port * 2)))
+
+#define RCU_AHB_USBH_OFFSET    17
+#define RCU_CGCFGAHB_USBHEN(port)   (1 << (RCU_AHB_USBH_OFFSET + (port * 2)))
 
 #define RCU_AHB_CAN_OFFSET      9
 #define RCU_CGCFGAHB_CANEN(port)   (1 << (RCU_AHB_CAN_OFFSET + port))
@@ -177,9 +180,13 @@ struct rcu_reg {
 #define RCU_RSTDISAHB_GPIOBEN        (1 << (RCU_RSTDISAHB_GPIO_OFFSET + 1))
 #define RCU_RSTDISAHB_GPIOCEN        (1 << (RCU_RSTDISAHB_GPIO_OFFSET + 2))
 
-#define RCU_RSTDISAHB_USBDEN(port)   (1 << (RCU_AHB_USBD_OFFSET + port * 2))
-#define RCU_RSTDISAHB_USBD0EN        (1 << (RCU_AHB_USBD_OFFSET + 0))
-#define RCU_RSTDISAHB_USBD1EN        (1 << (RCU_AHB_USBD_OFFSET + 1 * 2))
+#define RCU_RSTDISAHB_USBDEN(port)   (1 << (RCU_AHB_USBD_OFFSET + (port * 2)))
+#define RCU_RSTDISAHB_USBD0EN        (1 << (RCU_AHB_USBD_OFFSET + (0)))
+#define RCU_RSTDISAHB_USBD1EN        (1 << (RCU_AHB_USBD_OFFSET + (1 * 2)))
+
+#define RCU_RSTDISAHB_USBHEN(port)   (1 << (RCU_AHB_USBH_OFFSET + (port * 2)))
+#define RCU_RSTDISAHB_USBH0EN        (1 << (RCU_AHB_USBH_OFFSET + (0)))
+#define RCU_RSTDISAHB_USBH1EN        (1 << (RCU_AHB_USBH_OFFSET + (1 * 2)))
 
 #define RCU_RSTDISAHB_CANFDEN(port)   (1 << (RCU_AHB_CANFD_OFFSET + port))
 #define RCU_RSTDISAHB_CANEN(port)     (1 << (RCU_AHB_CAN_OFFSET + port))
@@ -367,7 +374,9 @@ void niiet_tmr_set_rcu(int num) {
 
 void niiet_usbd_set_rcu(int num) {
 	RCU->RCU_CGCFGAHB_reg |= RCU_CGCFGAHB_USBDEN(num);
+	//RCU->RCU_CGCFGAHB_reg |= RCU_CGCFGAHB_USBHEN(num);
 	RCU->RCU_RSTDISAHB_reg |= RCU_RSTDISAHB_USBDEN(num);
+	//RCU->RCU_RSTDISAHB_reg |= RCU_RSTDISAHB_USBHEN(num);
 #if defined(CONF_RCU_TYPE_PLL_NUM)
 #define USBCLKCFG_CLKSEL      CONF_RCU_TYPE_PLL_NUM
 	niiet_sysclk_pll_init(CONF_RCU_TYPE_PLL_NUM);
