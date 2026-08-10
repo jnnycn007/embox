@@ -377,13 +377,12 @@ void niiet_usbd_set_rcu(int num) {
 	//RCU->RCU_CGCFGAHB_reg |= RCU_CGCFGAHB_USBHEN(num);
 	RCU->RCU_RSTDISAHB_reg |= RCU_RSTDISAHB_USBDEN(num);
 	//RCU->RCU_RSTDISAHB_reg |= RCU_RSTDISAHB_USBHEN(num);
-#if defined(CONF_RCU_TYPE_PLL_NUM)
-#define USBCLKCFG_CLKSEL      CONF_RCU_TYPE_PLL_NUM
-	niiet_sysclk_pll_init(CONF_RCU_TYPE_PLL_NUM);
+#if defined(CONF_RCU_TYPE_USB_PLL_NUM)
+#define USBCLKCFG_CLKSEL      CONF_RCU_TYPE_USB_PLL_NUM
 #else
-#define USBCLKCFG_CLKSEL      RCU_USBCLKCFG_CLKSEL_SYSPLL1CLK_MASK
-	niiet_sysclk_pll_init(1);
+#define USBCLKCFG_CLKSEL      1
 #endif
+	niiet_sysclk_pll_init(USBCLKCFG_CLKSEL);
 	RCU->RCU_USBCFG_reg[num] = RCU_USBCLKCFG_CLKSEL_PLL(USBCLKCFG_CLKSEL);
 	RCU->RCU_USBCFG_reg[num] |= RCU_USBCLKCFG_CLKEN_MASK;
 }
@@ -459,42 +458,42 @@ void niiet_sysclk_pll_init(int pll) {
 
 
 #elif (CONF_RCU_CLK_ENABLE_HSECLK_VAL() == 16000000)
-    //FOUT = 120 000 000 Hz  from 16 MHz HSE
-    // RCU->PLLDIV is equivalent for RCU->PLL[0].DIV
-    RCU->RCU_PLLCFG_reg[pll].DIV = ( 1 << RCU_PLL_DIV_DIV1A_Pos ) |
-                  ( 1 << RCU_PLL_DIV_DIV1B_Pos ) |
+    //FOUT = 60 000 000 Hz  from 16 MHz HSE
+    RCU->RCU_PLLCFG_reg[pll].DIV = ( 3 << RCU_PLL_DIV_DIV1A_Pos ) |
+                  ( 3 << RCU_PLL_DIV_DIV1B_Pos ) |
                   ( 1 << RCU_PLL_DIV_PREDIV_Pos) |
                   ( 1 << RCU_PLL_DIV_NNCLR_Pos ) |             // N-divider enable
                   ( 1 << RCU_PLL_DIV_RNCLR_Pos ) |             // R-divider enable
-                  ( 3 << RCU_PLL_DIV_RDIV_Pos  ) |
+                  ( 1 << RCU_PLL_DIV_RDIV_Pos  ) |
                   (120 << RCU_PLL_DIV_NDIV_Pos );
-	RCU->RCU_PLLCFG_reg[pll].MOD  = (1 << RCU_PLL_FRAC_FRAC_Pos );
-	RCU->RCU_PLLCFG_reg[pll].FRAC = (1 << RCU_PLL_MOD_MOD_Pos   );
+	RCU->RCU_PLLCFG_reg[pll].MOD  = (1 << RCU_PLL_MOD_MOD_Pos );
+	RCU->RCU_PLLCFG_reg[pll].FRAC = (1 << RCU_PLL_FRAC_FRAC_Pos    );
 	RCU->RCU_PLLCFG_reg[pll].CFG  = (1 << RCU_PLL_CFG_FOUTEN_Pos ) |			// Fout enable
 			       (3 << RCU_PLL_CFG_PFD_Pos    ) |
 			       (0 << RCU_PLL_CFG_CLKSEL_Pos ) |
 			       (1 << RCU_PLL_CFG_VCOMODE_Pos) |
+				   (0x9 << RCU_PLL_CFG_CP_Pos) |
 			       (0 << RCU_PLL_CFG_ST_Pos) ;				  // ST = 0 for integer divider
 
 #elif (CONF_RCU_CLK_ENABLE_HSECLK_VAL() == 20000000)
 
 #elif (CONF_RCU_CLK_ENABLE_HSECLK_VAL() == 24000000)
 #elif (CONF_RCU_CLK_ENABLE_HSECLK_VAL() == 27000000)
-    //FOUT = 204 000 000 Hz  from 27 MHz HSE
-    // RCU->PLLDIV is equivalent for RCU->PLL[0].DIV
-    RCU->RCU_PLLCFG_reg[pll].DIV = ( 1 << RCU_PLL_DIV_DIV1A_Pos ) |
+    //FOUT = 60 000 000 Hz  from 27 MHz HSE
+    RCU->RCU_PLLCFG_reg[pll].DIV = ( 4 << RCU_PLL_DIV_DIV1A_Pos ) |
                   ( 2 << RCU_PLL_DIV_DIV1B_Pos ) |
                   ( 1 << RCU_PLL_DIV_PREDIV_Pos) |
                   ( 1 << RCU_PLL_DIV_NNCLR_Pos ) |             // N-divider enable
                   ( 1 << RCU_PLL_DIV_RNCLR_Pos ) |             // R-divider enable
                   ( 2 << RCU_PLL_DIV_RDIV_Pos  ) |
                   (100 << RCU_PLL_DIV_NDIV_Pos );
-	RCU->RCU_PLLCFG_reg[pll].MOD  = (1 << RCU_PLL_FRAC_FRAC_Pos );
-	RCU->RCU_PLLCFG_reg[pll].FRAC = (1 << RCU_PLL_MOD_MOD_Pos   );
+	RCU->RCU_PLLCFG_reg[pll].MOD  = (1 << RCU_PLL_MOD_MOD_Pos);
+	RCU->RCU_PLLCFG_reg[pll].FRAC = (1 << RCU_PLL_FRAC_FRAC_Pos  );
 	RCU->RCU_PLLCFG_reg[pll].CFG  = (1 << RCU_PLL_CFG_FOUTEN_Pos ) |			// Fout enable
 			       (3 << RCU_PLL_CFG_PFD_Pos    ) |
 			       (0 << RCU_PLL_CFG_CLKSEL_Pos ) |
 			       (1 << RCU_PLL_CFG_VCOMODE_Pos) |
+				   (0x9 << RCU_PLL_CFG_CP_Pos) |
 			       (0 << RCU_PLL_CFG_ST_Pos) ;				  // ST = 0 for integer divider
 
 #else
@@ -546,8 +545,7 @@ void niiet_sysclk_init(void) {
 
 #elif (CONF_RCU_CLK_ENABLE_HSECLK_VAL() == 24000000)
 #elif (CONF_RCU_CLK_ENABLE_HSECLK_VAL() == 27000000)
-    //FOUT = 204 000 000 Hz  from 27 MHz HSE
-    // RCU->PLLDIV is equivalent for RCU->PLL[0].DIV
+    //FOUT = 150 000 000 Hz  from 27 MHz HSE
     RCU->RCU_PLLCFG_reg[0].DIV = ( 1 << RCU_PLL_DIV_DIV1A_Pos ) |
                   ( 2 << RCU_PLL_DIV_DIV1B_Pos ) |
                   ( 1 << RCU_PLL_DIV_PREDIV_Pos) |
@@ -555,8 +553,8 @@ void niiet_sysclk_init(void) {
                   ( 1 << RCU_PLL_DIV_RNCLR_Pos ) |             // R-divider enable
                   ( 2 << RCU_PLL_DIV_RDIV_Pos  ) |
                   (100 << RCU_PLL_DIV_NDIV_Pos );
-	RCU->RCU_PLLCFG_reg[0].MOD  = (1 << RCU_PLL_FRAC_FRAC_Pos );
-	RCU->RCU_PLLCFG_reg[0].FRAC = (1 << RCU_PLL_MOD_MOD_Pos   );
+	RCU->RCU_PLLCFG_reg[0].MOD  = (1 << RCU_PLL_MOD_MOD_Pos );
+	RCU->RCU_PLLCFG_reg[0].FRAC = (1 << RCU_PLL_FRAC_FRAC_Pos);
 	RCU->RCU_PLLCFG_reg[0].CFG  = (1 << RCU_PLL_CFG_FOUTEN_Pos ) |			// Fout enable
 			       (3 << RCU_PLL_CFG_PFD_Pos    ) |
 			       (0 << RCU_PLL_CFG_CLKSEL_Pos ) |
