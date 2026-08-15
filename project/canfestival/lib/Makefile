@@ -19,6 +19,9 @@ $(CONFIGURE) :
 			-DCF_TARGET=embox \
 			-DCF_CAN_DRIVER=embox \
 	)
+
+	python3 $(CF_SOURCE_DIR)/objdictgen/objdictgen.py $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestSlave.dcf $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestSlave.c
+	python3 $(CF_SOURCE_DIR)/objdictgen/objdictgen.py $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestMaster.dcf $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestMaster.c
 	touch $@
 
 $(BUILD) :
@@ -35,4 +38,14 @@ $(INSTALL) :
 	$(CP) -r $(CF_BUILD_DIR)/include/* $(INSTALL_INC_DIR)/
 	$(CP) -r $(CF_SOURCE_DIR)/include/* $(INSTALL_INC_DIR)/
 	$(CP) -r $(CF_SOURCE_DIR)/include/embox/* $(INSTALL_INC_DIR)/
+	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/Slave.h $(INSTALL_INC_DIR)/
+	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestSlave.h $(INSTALL_INC_DIR)/
+	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/Master.h $(INSTALL_INC_DIR)/
+	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestMaster.h $(INSTALL_INC_DIR)/
+	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestMasterSlave.h $(INSTALL_INC_DIR)/
+	$(MKDIR) $(PKG_INSTALL_DIR)/examples
+	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/Slave.c $(PKG_INSTALL_DIR)/examples/
+	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestSlave.c $(PKG_INSTALL_DIR)/examples/
+	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/Master.c $(PKG_INSTALL_DIR)/examples/
+	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestMaster.c $(PKG_INSTALL_DIR)/examples/
 	touch $@
