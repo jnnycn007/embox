@@ -75,6 +75,7 @@ excpt_entry_common:
 	stp     x24, x25, [sp, #(8 * 24)]
 	stp     x26, x27, [sp, #(8 * 26)]
 	stp     x28, x29, [sp, #(8 * 28)]
+#ifdef __ARM_NEON
 	/* Store q0-q31 */
 	add     x2, sp, #EXCPT_GPRS
 	stp     q0, q1, [x2, #0]
@@ -98,6 +99,7 @@ excpt_entry_common:
 	mrs     x4, fpcr
 	add     x5, sp, #(EXCPT_GPRS + EXCPT_Q)
 	stp     x3, x4, [x5]
+#endif
 	/* Store lr, sp, pc, psr */
 	cbz     x0, 1f
 	add     x10, sp, #EXCPT_FRAME
@@ -116,6 +118,7 @@ excpt_entry_common:
 	br      x2
 
 excpt_exit:
+#ifdef __ARM_NEON
 	/* Load q0-q31 */
 	add     x2, sp, #EXCPT_GPRS
 	ldp     q0, q1, [x2, #0]
@@ -139,6 +142,7 @@ excpt_exit:
 	ldp     x3, x4, [x5]
 	msr     fpsr, x3
 	msr     fpcr, x4
+#endif
 	/* Load lr, pc, psr */
 	ldp     x30, x10, [sp, #(8 * 30)]
 	ldp     x11, x12, [sp, #(8 * 32)]

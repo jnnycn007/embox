@@ -17,6 +17,7 @@
 context_switch:
 	/* Save current context (struct context) */
 	sub     sp, sp, #FPSIMD_FRAME
+#ifdef __ARM_NEON
 	stp     q0, q1, [sp, #0]
 	stp     q2, q3, [sp, #32]
 	stp     q4, q5, [sp, #64]
@@ -33,6 +34,7 @@ context_switch:
 	stp     q26, q27, [sp, #416]
 	stp     q28, q29, [sp, #448]
 	stp     q30, q31, [sp, #480]
+#endif	
 
 	mov     x2, sp
 	mrs     x3, spsr_el1
@@ -58,6 +60,7 @@ context_switch:
 	mov     sp, x2
 	// msr spsr_el1, x3
 
+#ifdef __ARM_NEON
 	ldp     q0, q1, [sp, #0]
 	ldp     q2, q3, [sp, #32]
 	ldp     q4, q5, [sp, #64]
@@ -74,6 +77,7 @@ context_switch:
 	ldp     q26, q27, [sp, #416]
 	ldp     q28, q29, [sp, #448]
 	ldp     q30, q31, [sp, #480]
+#endif	
 	add     sp, sp, #FPSIMD_FRAME
 
 	msr     daif, x4
