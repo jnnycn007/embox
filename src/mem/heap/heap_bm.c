@@ -252,9 +252,7 @@ void *bm_memalign(void *heap, size_t boundary, size_t size) {
 		size = sizeof(struct free_block);
 	}
 
-	/* Keep every block a whole number of max_align_t units, so that a
-	 * split never leaves the next block header misaligned. */
-	size = binalign_bound(size, __alignof__(max_align_t));
+	size = (size + (3)) & ~(3); /* align by word*/
 
 	for (link = free_blocks_list->next; link != free_blocks_list; link = link->next) {
 		block = (struct free_block *) ((uintptr_t *) link - 1);
