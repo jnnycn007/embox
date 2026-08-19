@@ -6,8 +6,10 @@ PKG_MD5     := e3013d5d24e00f6f48d45bb3f33a8620
 
 CF_SOURCE_DIR = $(PKG_SOURCE_DIR)
 CF_BUILD_DIR = $(PKG_SOURCE_DIR)/build
+EX_DIR = $(CF_SOURCE_DIR)/examples/TestMasterSlave
 
 INSTALL_INC_DIR := $(PKG_INSTALL_DIR)/include
+INSTALL_SRC_DIR := $(PKG_INSTALL_DIR)/src
 
 $(CONFIGURE) :
 	$(MKDIR) $(CF_BUILD_DIR) && cd $(CF_BUILD_DIR) && ( \
@@ -20,8 +22,8 @@ $(CONFIGURE) :
 			-DCF_CAN_DRIVER=embox \
 	)
 
-	python3 $(CF_SOURCE_DIR)/objdictgen/objdictgen.py $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestSlave.dcf $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestSlave.c
-	python3 $(CF_SOURCE_DIR)/objdictgen/objdictgen.py $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestMaster.dcf $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestMaster.c
+	python3 $(CF_SOURCE_DIR)/objdictgen/objdictgen.py $(EX_DIR)/TestSlave.dcf $(EX_DIR)/TestSlave.c
+	python3 $(CF_SOURCE_DIR)/objdictgen/objdictgen.py $(EX_DIR)/TestMaster.dcf $(EX_DIR)/TestMaster.c
 	touch $@
 
 $(BUILD) :
@@ -32,20 +34,13 @@ $(BUILD) :
 
 $(INSTALL) :
 	$(MKDIR) $(INSTALL_INC_DIR)
+	$(MKDIR) $(INSTALL_SRC_DIR)
 	$(CP) $(CF_BUILD_DIR)/src/libcanfestival.a $(PKG_INSTALL_DIR)
 	$(CP) $(CF_BUILD_DIR)/drivers/libcanfestival_embox.a $(PKG_INSTALL_DIR)
 	$(CP) $(CF_BUILD_DIR)/drivers/libcanfestival_can_embox.a $(PKG_INSTALL_DIR)
 	$(CP) -r $(CF_BUILD_DIR)/include/* $(INSTALL_INC_DIR)/
 	$(CP) -r $(CF_SOURCE_DIR)/include/* $(INSTALL_INC_DIR)/
 	$(CP) -r $(CF_SOURCE_DIR)/include/embox/* $(INSTALL_INC_DIR)/
-	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/Slave.h $(INSTALL_INC_DIR)/
-	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestSlave.h $(INSTALL_INC_DIR)/
-	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/Master.h $(INSTALL_INC_DIR)/
-	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestMaster.h $(INSTALL_INC_DIR)/
-	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestMasterSlave.h $(INSTALL_INC_DIR)/
-	$(MKDIR) $(PKG_INSTALL_DIR)/examples
-	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/Slave.c $(PKG_INSTALL_DIR)/examples/
-	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestSlave.c $(PKG_INSTALL_DIR)/examples/
-	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/Master.c $(PKG_INSTALL_DIR)/examples/
-	$(CP) $(CF_SOURCE_DIR)/examples/TestMasterSlave/TestMaster.c $(PKG_INSTALL_DIR)/examples/
+	$(CP) $(EX_DIR)/Slave.h $(EX_DIR)/TestSlave.h $(EX_DIR)/Master.h $(EX_DIR)/TestMaster.h $(EX_DIR)/TestMasterSlave.h $(INSTALL_INC_DIR)/
+	$(CP) $(EX_DIR)/Slave.c $(EX_DIR)/TestSlave.c $(EX_DIR)/Master.c $(EX_DIR)/TestMaster.c $(INSTALL_SRC_DIR)/
 	touch $@
