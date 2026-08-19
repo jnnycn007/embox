@@ -31,8 +31,6 @@ SECTION_SYMBOLS(bss)
 SECTIONS {
 	.text : ALIGN(TEXT_ALIGNMENT) {
 
-		KEEP(*(.bootcode));
-		KEEP(*(.text.kernel_vectors*));
 		LDS_MODULES_TEXT
 		*(.text)
 		*(.text.*)

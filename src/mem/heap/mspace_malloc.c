@@ -25,6 +25,7 @@
 #include <lib/libds/dlist.h>
 #include <lib/libds/array.h>
 #include <util/log.h>
+#include <util/math.h>
 
 #include <kernel/printk.h>
 #include <kernel/panic.h>
@@ -240,7 +241,7 @@ out_unlock:
 
 void *mspace_malloc(size_t size, struct dlist_head *mspace) {
 	assert(mspace);
-	return mspace_memalign(__alignof__(max_align_t), size, mspace);
+	return mspace_memalign(max(8, __alignof__(max_align_t)), size, mspace);
 }
 
 int mspace_free(void *ptr, struct dlist_head *mspace) {
@@ -285,7 +286,7 @@ void *mspace_realloc(void *ptr, size_t size, struct dlist_head *mspace) {
 	assert(mspace);
 	assert(size != 0 || ptr == NULL);
 
-	ret = mspace_memalign(__alignof__(max_align_t), size, mspace);
+	ret = mspace_memalign(max(8, __alignof__(max_align_t)), size, mspace);
 
 	if (ret == NULL) {
 		return NULL; /* error: errno set in malloc */
