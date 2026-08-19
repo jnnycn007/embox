@@ -9,7 +9,7 @@
 
 .weak gicv3_init_el3
 
-.section .bootcode
+.section .bootcode, "ax", %progbits
 .global aarch64_reset_handler
 
 aarch64_reset_handler:

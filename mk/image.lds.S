@@ -31,6 +31,8 @@ SECTION_SYMBOLS(bss)
 SECTIONS {
 	.text : ALIGN(TEXT_ALIGNMENT) {
 
+		KEEP(*(.bootcode));
+		KEEP(*(.text.kernel_vectors*));
 		LDS_MODULES_TEXT
 		*(.text)
 		*(.text.*)
@@ -65,9 +67,11 @@ SECTIONS {
 
 		ALIGNMENT();
 		_eh_frame_begin = .;
+		__eh_frame_start = .;
 		KEEP(*(.eh_frame))
 		KEEP(*(.eh_frame.*))
 		KEEP(*(.eh_frame_end))
+		__eh_frame_end = .;
 		KEEP(*(.gcc_except_table*))
 
 		ALIGNMENT();

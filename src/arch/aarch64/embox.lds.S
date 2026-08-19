@@ -14,6 +14,7 @@ _ram_size = LENGTH(RAM);
 SECTIONS {
 	.text : {
 		KEEP(*(.bootcode));
+		KEEP(*(.text.kernel_vectors*));
 
 		*(.text)
 		*(.text.*)

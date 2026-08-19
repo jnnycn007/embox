@@ -47,6 +47,12 @@
 #define MMU_DESC_TP             (1UL << 1)  /* Block or Table/Page */
 #define MMU_DESC_NS             (1UL << 5)  /* Non-secure bit */
 #define MMU_DESC_AF             (1UL << 10) /* The Access flag */
+#define MMU_DESC_SH             /* Shareability field */
+#define MMU_DESC_SH_MASK        0b11UL
+#define MMU_DESC_SH_SHIFT       8
+#define MMU_DESC_SH_NS          0b00UL /* Non-shareable */
+#define MMU_DESC_SH_OS          0b10UL /* Outer Shareable */
+#define MMU_DESC_SH_IS          0b11UL /* Inner Shareable */
 #define MMU_DESC_PXN            (1UL << 53) /* The Execute-never bit EL1 */
 #define MMU_DESC_UXN            (1UL << 54) /* The Execute-never bit EL0 */
 

@@ -177,7 +177,10 @@ ifeq ($(COMPILER),clang)
 common_ccflags += -Wno-gnu
 common_ccflags += -fshort-enums
 common_ccflags += -Wno-address-of-packed-member
+# -meabi gnu is ARM32. Clang aarch64 rejects it.
+ifneq ($(ARCH),aarch64)
 common_ccflags += -meabi gnu
+endif
 ifeq ($(shell expr $(CLANG_VERSION_MAJOR) \>= 16), 1)
 common_ccflags += -Wno-missing-multilib
 endif

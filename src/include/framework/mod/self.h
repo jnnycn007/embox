@@ -28,8 +28,9 @@
 #define MOD_SELF_INIT(mod_ops) _MOD_INIT(__EMBUILD_MOD__, mod_ops)
 
 /* Make current module a runtime module */
-#define MOD_SELF_RUNTIME()                       \
-	struct mod_data __MOD_DATA(__EMBUILD_MOD__); \
+#define MOD_SELF_RUNTIME()                                    \
+	struct mod_data __MOD_DATA(__EMBUILD_MOD__)                \
+	    __attribute__((section(".bss.embox.mod_data")));       \
 	RUNLEVEL_MOD_REGISTER(__EMBUILD_MOD__)
 
 __BEGIN_DECLS

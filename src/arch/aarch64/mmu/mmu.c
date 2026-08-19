@@ -64,6 +64,15 @@ static int mmu_init(void) {
 	/* TTBR0_EL1.ASID defines the ASID */
 	tcr &= ~TCR_EL1_A1;
 
+	/* Table walks are cacheable and Inner Shareable, matching the
+	 * attributes the page tables themselves are mapped with */
+	tcr = FIELD_SET(tcr, TCR_ELn_IRGN0, TCR_ELn_IRGN0_WBWA);
+	tcr = FIELD_SET(tcr, TCR_ELn_ORGN0, TCR_ELn_ORGN0_WBWA);
+	tcr = FIELD_SET(tcr, TCR_ELn_SH0, TCR_ELn_SH0_IS);
+	tcr = FIELD_SET(tcr, TCR_ELn_IRGN1, TCR_ELn_IRGN1_WBWA);
+	tcr = FIELD_SET(tcr, TCR_ELn_ORGN1, TCR_ELn_ORGN1_WBWA);
+	tcr = FIELD_SET(tcr, TCR_ELn_SH1, TCR_ELn_SH1_IS);
+
 	/* Store Translation Control Register */
 	ARCH_REG_STORE(TCR_EL1, tcr);
 
@@ -86,16 +95,28 @@ void mmu_on(void) {
 
 	dmb(sy);
 
-	/* Enable MMU (stage 1 address translation) */
-	ARCH_REG_ORIN(SCTLR_EL1, SCTLR_ELn_M);
+	/* Enable MMU (stage 1 address translation) together with the caches.
+	 * With SCTLR.M set but SCTLR.C clear, all data accesses are treated as
+	 * Non-cacheable regardless of what the page tables say, and exclusive
+	 * accesses to Non-cacheable memory are not architecturally guaranteed
+	 * to work: on a Cortex-A72 an ldaxr/stxr pair to such memory raises an
+	 * SError. */
+	__asm__ __volatile__("ic iallu" : : : "memory");
+	dsb(sy);
+	isb();
+	ARCH_REG_ORIN(SCTLR_EL1, SCTLR_ELn_M | SCTLR_ELn_C | SCTLR_ELn_I);
+	isb();
 }
 
 void mmu_off(void) {
 	/* Flush TLB */
 	ARCH_REG_STORE(TLBI_VMALLE1, 0);
 
-	/* Disable MMU (stage 1 address translation) */
-	ARCH_REG_CLEAR(SCTLR_EL1, SCTLR_ELn_M);
+	/* Disable MMU (stage 1 address translation). The caches have to go
+	 * down with it: leaving SCTLR.C set with translation off would make
+	 * every access Cacheable, which is not what the caller asked for. */
+	ARCH_REG_CLEAR(SCTLR_EL1, SCTLR_ELn_C | SCTLR_ELn_I | SCTLR_ELn_M);
+	isb();
 }
 
 mmu_ctx_t mmu_create_context(uintptr_t *pgd) {
@@ -196,10 +217,12 @@ uintptr_t mmu_pte_pack(uintptr_t addr, int prot) {
 	if (prot & PROT_NOCACHE) {
 		/* Use memory attribute 0 (device) */
 		pte = FIELD_SET(pte, MMU_DESC_ATTRINDX, MEM_DEVICE_ATTRINDX);
+		pte = FIELD_SET(pte, MMU_DESC_SH, MMU_DESC_SH_OS);
 	}
 	else {
 		/* Use memory attribute 1 (normal) */
 		pte = FIELD_SET(pte, MMU_DESC_ATTRINDX, MEM_NORMAL_ATTRINDX);
+		pte = FIELD_SET(pte, MMU_DESC_SH, MMU_DESC_SH_IS);
 	}
 
 	if (!(prot & PROT_EXEC)) {

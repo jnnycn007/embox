@@ -16,11 +16,12 @@
 
 static void print_abort_syndrome(uint32_t syndrome) {
 	int el;
+	unsigned dfsc;
 
 	el = 1;
-	syndrome &= 0b111111;
+	dfsc = syndrome & 0b111111;
 
-	switch (syndrome) {
+	switch (dfsc) {
 	case 0b000000:
 		el = 0;
 	case 0b000001:
@@ -28,9 +29,10 @@ static void print_abort_syndrome(uint32_t syndrome) {
 		break;
 
 	case 0b000100:
-		el = 0;
 	case 0b000101:
-		log_raw(LOG_EMERG, "Translation fault (EL%i)\n", el);
+	case 0b000110:
+	case 0b000111:
+		log_raw(LOG_EMERG, "Translation fault (level %u)\n", dfsc & 0b11);
 		break;
 
 	case 0b001000:
@@ -76,6 +78,10 @@ static void print_abort_syndrome(uint32_t syndrome) {
 	case 0b110000:
 		log_raw(LOG_EMERG, "TLB Conflict fault\n");
 		break;
+
+	default:
+		log_raw(LOG_EMERG, "Unknown fault (DFSC = %#x)\n", dfsc);
+		break;
 	}
 }
 
@@ -92,16 +98,20 @@ void _NORETURN aarch64_sync_handler(struct excpt_context *ctx) {
 	case ESR_ELn_EC_INST_ABT:
 		log_raw(LOG_EMERG, "\nInstruction abort exception!\n");
 		print_abort_syndrome(syndrome);
+		log_raw(LOG_EMERG, "FAR_EL1 = %#" PRIx64 "\n",
+		    (uint64_t)ARCH_REG_LOAD(FAR_EL1));
 		break;
 
 	case ESR_ELn_EC_DATA_ABT:
 		log_raw(LOG_EMERG, "\nData abort exception!\n");
 		print_abort_syndrome(syndrome);
+		log_raw(LOG_EMERG, "FAR_EL1 = %#" PRIx64 "\n",
+		    (uint64_t)ARCH_REG_LOAD(FAR_EL1));
 		break;
 
 	default:
 		log_raw(LOG_EMERG, "\nSynchronous exception!\n");
-		log_raw(LOG_EMERG, "ESR_EL1 = " PRIx32 "\n", esr);
+		log_raw(LOG_EMERG, "ESR_EL1 = %" PRIx32 "\n", esr);
 		break;
 	}
 

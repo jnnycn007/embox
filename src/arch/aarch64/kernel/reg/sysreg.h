@@ -468,6 +468,52 @@
 #define TCR_ELn_TG0_16KB                       0b10
 #define TCR_ELn_TG0_64KB                       0b01
 
+#define TCR_ELn_IRGN0                          /* Inner cacheability of the TTBR0 table walk */
+#define TCR_ELn_IRGN0_MASK                     0b11UL
+#define TCR_ELn_IRGN0_SHIFT                    8
+#define TCR_ELn_IRGN0_NC                       0b00UL /* Non-cacheable */
+#define TCR_ELn_IRGN0_WBWA                     0b01UL /* Write-Back Write-Allocate */
+#define TCR_ELn_IRGN0_WT                       0b10UL /* Write-Through */
+#define TCR_ELn_IRGN0_WB                       0b11UL /* Write-Back no Write-Allocate */
+
+#define TCR_ELn_ORGN0                          /* Outer cacheability of the TTBR0 table walk */
+#define TCR_ELn_ORGN0_MASK                     0b11UL
+#define TCR_ELn_ORGN0_SHIFT                    10
+#define TCR_ELn_ORGN0_NC                       0b00UL /* Non-cacheable */
+#define TCR_ELn_ORGN0_WBWA                     0b01UL /* Write-Back Write-Allocate */
+#define TCR_ELn_ORGN0_WT                       0b10UL /* Write-Through */
+#define TCR_ELn_ORGN0_WB                       0b11UL /* Write-Back no Write-Allocate */
+
+#define TCR_ELn_IRGN1                          /* Inner cacheability of the TTBR1 table walk */
+#define TCR_ELn_IRGN1_MASK                     0b11UL
+#define TCR_ELn_IRGN1_SHIFT                    24
+#define TCR_ELn_IRGN1_NC                       0b00UL /* Non-cacheable */
+#define TCR_ELn_IRGN1_WBWA                     0b01UL /* Write-Back Write-Allocate */
+#define TCR_ELn_IRGN1_WT                       0b10UL /* Write-Through */
+#define TCR_ELn_IRGN1_WB                       0b11UL /* Write-Back no Write-Allocate */
+
+#define TCR_ELn_ORGN1                          /* Outer cacheability of the TTBR1 table walk */
+#define TCR_ELn_ORGN1_MASK                     0b11UL
+#define TCR_ELn_ORGN1_SHIFT                    26
+#define TCR_ELn_ORGN1_NC                       0b00UL /* Non-cacheable */
+#define TCR_ELn_ORGN1_WBWA                     0b01UL /* Write-Back Write-Allocate */
+#define TCR_ELn_ORGN1_WT                       0b10UL /* Write-Through */
+#define TCR_ELn_ORGN1_WB                       0b11UL /* Write-Back no Write-Allocate */
+
+#define TCR_ELn_SH0                            /* Shareability of the TTBR0 table walk */
+#define TCR_ELn_SH0_MASK                       0b11UL
+#define TCR_ELn_SH0_SHIFT                      12
+#define TCR_ELn_SH0_NS                         0b00UL /* Non-shareable */
+#define TCR_ELn_SH0_OS                         0b10UL /* Outer Shareable */
+#define TCR_ELn_SH0_IS                         0b11UL /* Inner Shareable */
+
+#define TCR_ELn_SH1                            /* Shareability of the TTBR1 table walk */
+#define TCR_ELn_SH1_MASK                       0b11UL
+#define TCR_ELn_SH1_SHIFT                      28
+#define TCR_ELn_SH1_NS                         0b00UL /* Non-shareable */
+#define TCR_ELn_SH1_OS                         0b10UL /* Outer Shareable */
+#define TCR_ELn_SH1_IS                         0b11UL /* Inner Shareable */
+
 /** Thread Pointer / ID Register (EL0) */
 #define TPIDR_EL0                              TPIDR_EL0
 #define __ARCH_REG_LOAD__TPIDR_EL0()           __MRS_SYS(TPIDR_EL0)

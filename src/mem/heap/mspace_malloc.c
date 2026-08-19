@@ -15,6 +15,7 @@
 
 #include <util/err.h>
 #include <errno.h>
+#include <stddef.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -239,7 +240,7 @@ out_unlock:
 
 void *mspace_malloc(size_t size, struct dlist_head *mspace) {
 	assert(mspace);
-	return mspace_memalign(8, size, mspace);
+	return mspace_memalign(__alignof__(max_align_t), size, mspace);
 }
 
 int mspace_free(void *ptr, struct dlist_head *mspace) {
@@ -284,7 +285,7 @@ void *mspace_realloc(void *ptr, size_t size, struct dlist_head *mspace) {
 	assert(mspace);
 	assert(size != 0 || ptr == NULL);
 
-	ret = mspace_memalign(8, size, mspace);
+	ret = mspace_memalign(__alignof__(max_align_t), size, mspace);
 
 	if (ret == NULL) {
 		return NULL; /* error: errno set in malloc */
