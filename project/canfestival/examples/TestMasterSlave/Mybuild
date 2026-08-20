@@ -1,0 +1,14 @@
+package project.canfestival.examples
+
+@AutoCmd
+@Cmd(name="TestMasterSlave",help="")
+@BuildDepends(project.canfestival.libcanfestival)
+module TestMasterSlave {   
+	source "Master.c"
+	source "Slave.c"
+	source "TestMaster.c"
+	source "TestMasterSlave.c"
+	source "TestSlave.c"
+
+	@NoRuntime depends project.canfestival.libcanfestival
+}
