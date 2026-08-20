@@ -1,8 +1,8 @@
 
 PKG_NAME    := canfestival
-PKG_VER     := caa42ec6df0bd9e937afc258f0ee3dac803e0e06
+PKG_VER     := 400e119f56bae7730f6942174cc829eb06538319
 PKG_SOURCES := https://github.com/embox/canfestival/archive/$(PKG_VER).zip
-PKG_MD5     := e3792d09c09a7dedd67c505eb32fba87
+PKG_MD5     := e3013d5d24e00f6f48d45bb3f33a8620
 
 CF_SOURCE_DIR = $(PKG_SOURCE_DIR)
 CF_BUILD_DIR = $(PKG_SOURCE_DIR)/build
