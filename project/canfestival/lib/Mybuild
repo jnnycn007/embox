@@ -9,29 +9,3 @@ static module libcanfestival {
 	@NoRuntime depends embox.kernel.timer.sys_timer
 	@NoRuntime depends embox.kernel.thread.mutex
 }
-
-@BuildDepends(libcanfestival)
-@AutoCmd
-@Cmd(name = "canfestival_slave",
-    help = "Start CANFestival slave node (node-id 0x02, official TestMasterSlave example)")
-module slave_example {   
-    source "slave_example.c"
-
-	@AddPrefix("^BUILD/extbld/project/canfestival/libcanfestival/install/src")
-	source "Slave.c", "TestSlave.c"
-}
-
-@BuildDepends(libcanfestival)
-@AutoCmd
-@Cmd(name = "canfestival_master",
-    help = "Start CANFestival master node (node-id 0x01, official TestMasterSlave example)")
-module master_example {   
-    source "master_example.c"
-
-	@Cflags("-Wno-unused-variable")
-	@Cflags("-Wno-unused-but-set-variable")
-	@AddPrefix("^BUILD/extbld/project/canfestival/libcanfestival/install/src")
-	source "Master.c", "TestMaster.c"
-}
-
-
