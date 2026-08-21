@@ -1,0 +1,12 @@
+package project.canfestival.examples
+
+@Build(stage=1, script="$(EXTERNAL_MAKE)")
+@AutoCmd
+@Cmd(name="TestMasterSlave_codegen",help="")
+@BuildDepends(project.canfestival.libcanfestival)
+static module TestMasterSlave_codegen {
+	@AddPrefix("^BUILD/extbld/^MOD_PATH/install/include")
+	source "Master.c", "Slave.c", "TestMaster.c", "TestMasterSlave.c", "TestSlave.c"
+
+	@NoRuntime depends project.canfestival.libcanfestival
+}
