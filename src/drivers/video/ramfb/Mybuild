@@ -1,0 +1,18 @@
+package embox.driver.video
+
+module ramfb {
+	/* QEMU fw_cfg MMIO window ("virt" machine) */
+	option number base_addr = 0x09020000
+
+	option number fb_xres = 640
+	option number fb_yres = 480
+
+	source "ramfb.c"
+
+	depends embox.driver.periph_memory
+	@NoRuntime depends fb
+	depends fb_devfs
+	@NoRuntime depends embox.compat.libc.all
+	depends embox.kernel.task.idesc.idesc_mmap
+	depends embox.compat.posix.sys.mman.mmap_api
+}

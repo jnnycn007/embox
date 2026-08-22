@@ -1,0 +1,24 @@
+package embox.driver.video
+
+module bcm2711_fb {
+	/* VideoCore mailbox. BCM2711 (Pi 4) is at 0xFE00B880, BCM2837 (Pi 3)
+	 * at 0x3F00B880, BCM2835 (Pi 1) at 0x2000B880. */
+	option number base_addr = 0xFE00B880
+
+	/* Used when the firmware reports no display size (HDMI unplugged,
+	 * no EDID) - the mailbox is still able to allocate a buffer. */
+	option number fb_xres = 1920
+	option number fb_yres = 1080
+
+	option number fb_bpp = 32
+
+	source "bcm2711_fb.c"
+
+	depends embox.driver.periph_memory
+	@NoRuntime depends fb
+	depends fb_devfs
+	@NoRuntime depends embox.compat.libc.all
+	depends embox.mem.mmap
+	depends embox.kernel.task.idesc.idesc_mmap
+	depends embox.compat.posix.sys.mman.mmap_api
+}
