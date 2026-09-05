@@ -87,14 +87,19 @@ static void gic_dist_init(void) {
 	}
 
 	for (i = 0; i <= itlines; i++) {
-		/* Deactivate and disable SGIs/PPIs/SPIs */
+		/* Deactivate, clear pending state and disable SGIs/PPIs/SPIs */
 		REG32_STORE(GICD_ICACTIVER(i), ~(uint32_t)0);
+		REG32_STORE(GICD_ICPENDR(i), ~(uint32_t)0);
 		REG32_STORE(GICD_ICENABLER(i), ~(uint32_t)0);
 	}
 
-	/* Enable distributor */
-	REG32_STORE(GICD_CTLR,
-	    GICD_CTLR_GRP0 | GICD_CTLR_GRP1_NS | GICD_CTLR_ARE_NS);
+	/* Enable group-1 forwarding by read-modify-write. The distributor may
+	 * already run in single-security state with affinity routing set up by
+	 * EL3 firmware (ATF/OP-TEE, e.g. RK3568 GIC-600 boots with
+	 * GICD_CTLR = 0x12); overwriting the register would drop ARE and break
+	 * the system-register interface (every IAR1 read then returns the
+	 * spurious INTID 1023). */
+	REG32_ORIN(GICD_CTLR, GICD_CTLR_GRP1_NS | GICD_CTLR_ARE_NS);
 	gic_wait_for_rwp(GICD_CTLR, GICD_CTLR_RWP);
 
 	/* Set SPIs to current CPU only */
@@ -116,6 +121,9 @@ static void gic_redist_init(void) {
 
 	/* Configure SGIs/PPIs as non-secure Group-1 */
 	REG32_STORE(GICR_IGROUPR0, ~(uint32_t)0);
+
+	/* Clear pending state of SGIs/PPIs */
+	REG32_STORE(GICR_ICPENDR0, ~(uint32_t)0);
 
 	/* Set SGIs/PPIs to be level triggered */
 	for (i = 0; i < 2; i++) {
@@ -207,7 +215,15 @@ void irqctrl_eoi(unsigned int irq) {
 }
 
 int irqctrl_get_intid(void) {
-	return ARCH_REG_LOAD(ICC_IAR1_EL1) & ICC_IAR1_EL1_INTID_MASK;
+	unsigned int intid;
+
+	intid = ARCH_REG_LOAD(ICC_IAR1_EL1) & ICC_IAR1_EL1_INTID_MASK;
+	/* 1020-1023 are the reserved "no pending group-1 interrupt" values */
+	if (intid >= 1020) {
+		return -1;
+	}
+
+	return intid;
 }
 
 void gicv3_init_el3(void) {
